@@ -34,6 +34,7 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
 import fi.tuni.friendsmap.entity.User;
+import fi.tuni.friendsmap.entity.UserLocation;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     public boolean onMapClick(@NonNull LatLng point) {
 
                             CameraPosition position = new CameraPosition.Builder()
-                                    .target(new LatLng(user.getLatitude(), user.getLongitude())) // Sets the new camera position
+                                    .target(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude())) // Sets the new camera position
                                     .zoom(17) // Sets the zoom
                                     .build(); // Creates a CameraPosition from the builder
 
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public User getUserAndSetLocation() {
-        User outputUser = new User(-1,"", 0, 0, "");
+        User outputUser = new User(-1,"", null);
 
         Intent intent = getIntent();
 
@@ -121,9 +122,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             ActivityCompat.requestPermissions(MainActivity.this, permissions, ACCESS_LOCATION_REQUEST_CODE);
         } else {
             Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude(), "");
 
-            outputUser.setLatitude(location.getLatitude());
-            outputUser.setLongitude(location.getLongitude());
+            user.setLocation(userLocation);
         }
 
         return outputUser;
@@ -131,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public void markLocationBtnClicked(View v) {
         mapboxMap.addMarker(new MarkerOptions()
-                .position(new LatLng(user.getLatitude(), user.getLongitude()))
+                .position(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
                 .title("Home")
         );
         System.out.println("HAHA");

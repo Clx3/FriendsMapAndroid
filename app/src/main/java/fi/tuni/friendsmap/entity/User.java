@@ -11,18 +11,12 @@ public class User {
 
     private String username;
 
-    private double longitude;
+    private UserLocation location;
 
-    private double latitude;
-
-    private String currentLocationInfo;
-
-    public User(long userId, String username, double longitude, double latitude, String currentLocationInfo) {
+    public User(long userId, String username, UserLocation location) {
         this.userId = userId;
         this.username = username;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.currentLocationInfo = currentLocationInfo;
+        this.location = location;
     }
 
     public long getUserId() {
@@ -41,27 +35,12 @@ public class User {
         this.username = username;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public UserLocation getLocation() {
+        return location;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLocation(UserLocation location) {
+        this.location = location;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getCurrentLocationInfo() {
-        return currentLocationInfo;
-    }
-
-    public void setCurrentLocationInfo(String currentLocationInfo) {
-        this.currentLocationInfo = currentLocationInfo;
-    }
 }
