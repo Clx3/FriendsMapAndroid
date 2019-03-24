@@ -47,7 +47,7 @@ import fi.tuni.friendsmap.entity.User;
 /**
  * A login screen that offers login via username/password.
  */
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity  {
 
     // UI references.
     private AutoCompleteTextView mUsernameView;
@@ -160,8 +160,11 @@ public class LoginActivity extends AppCompatActivity {
 
                             try {
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.putExtra("userId", response.getLong("id"));
                                 intent.putExtra("username", response.getString("username"));
-                                intent.putExtra("userId", response.getString("id"));
+                                intent.putExtra("latitude", response.getDouble("latitude"));
+                                intent.putExtra("longitude", response.getDouble("longitude"));
+                                intent.putExtra("locationInfo", response.getString("locationInfo"));
                                 startActivity(intent);
                             } catch (Exception e) {
                                 Toast.makeText(LoginActivity.this, "Critical error.", Toast.LENGTH_SHORT).show();

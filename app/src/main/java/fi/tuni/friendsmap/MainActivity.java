@@ -28,10 +28,15 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.annotation.Circle;
+import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
+import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
+
+import org.json.JSONException;
 
 import fi.tuni.friendsmap.entity.User;
 import fi.tuni.friendsmap.entity.UserLocation;
@@ -46,6 +51,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private LocationManager locationManager;
 
+    private CircleManager circleManager;
+    private Circle userCircle;
+
+    private HttpHandler httpHandler;
+
     private User user;
 
     @Override
@@ -53,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this, getResources().getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_main);
+
+        httpHandler = new HttpHandler(this);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         user = getUserAndSetLocation();
@@ -68,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
+                        circleManager = new CircleManager(MainActivity.this.mapView, MainActivity.this.mapboxMap, style);
                     }
                 });
 
@@ -97,6 +110,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+
+                    user = getUserAndSetLocation();
                 } catch(SecurityException e) {
 
                 }
@@ -111,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         Intent intent = getIntent();
 
-        outputUser.setUserId(intent.getLongExtra("id", 0));
+        outputUser.setUserId(intent.getLongExtra("userId", 0));
         outputUser.setUsername(intent.getStringExtra("username"));
 
         int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -124,17 +139,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude(), "");
 
-            user.setLocation(userLocation);
+            outputUser.setLocation(userLocation);
         }
 
         return outputUser;
     }
 
-    public void markLocationBtnClicked(View v) {
-        mapboxMap.addMarker(new MarkerOptions()
-                .position(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
-                .title("Home")
-        );
+    public void markLocationBtnClicked(View v) throws JSONException {
+        int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if(permissionCheck == PackageManager.PERMISSION_DENIED) {
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+            ActivityCompat.requestPermissions(MainActivity.this, permissions, ACCESS_LOCATION_REQUEST_CODE);
+        } else {
+            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude(), "");
+
+            user.setLocation(userLocation);
+        }
+        if(userCircle != null)
+            circleManager.delete(userCircle);
+
+        CircleOptions option = new CircleOptions()
+                .withLatLng(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
+                .withCircleRadius(10f);
+        userCircle = circleManager.create(option);
+
+        httpHandler.updateUserAndItsLocation(user);
         System.out.println("HAHA");
     }
 
