@@ -51,7 +51,6 @@ public class LoginActivity extends AppCompatActivity  {
 
     // UI references.
     private AutoCompleteTextView mUsernameView;
-    private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -66,18 +65,6 @@ public class LoginActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
-
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -105,6 +92,16 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     /**
+     * Called when the go to signup button is clicked to
+     * go to the signup page.
+     *
+     * @param v
+     */
+    public void goToSignupBtnClicked(View v) {
+        startActivity(new Intent(this, SignupActivity.class));
+    }
+
+    /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
@@ -113,21 +110,12 @@ public class LoginActivity extends AppCompatActivity  {
 
         // Reset errors.
         mUsernameView.setError(null);
-        mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
         String email = mUsernameView.getText().toString();
-        String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
-
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
@@ -186,7 +174,6 @@ public class LoginActivity extends AppCompatActivity  {
 
     private boolean isUsernameValid(String username) {
         //TODO: Replace this with your own logic
-        //return username.contains("@");
         return true;
     }
 

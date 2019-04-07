@@ -19,6 +19,10 @@ public class User {
         this.location = location;
     }
 
+    public boolean userHasLocation() {
+        return getLocation().getLatitude() != -1000 || getLocation().getLongitude() != -1000;
+    }
+
     public long getUserId() {
         return userId;
     }
@@ -41,6 +45,12 @@ public class User {
 
     public void setLocation(UserLocation location) {
         this.location = location;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("id: %d username: %s longitude: %f latitude %f location info: %s",
+                getUserId(), getUsername(), getLocation().getLongitude(), getLocation().getLatitude(), getLocation().getDescription());
     }
 
 }

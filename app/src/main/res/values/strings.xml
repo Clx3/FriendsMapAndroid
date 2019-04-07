@@ -1,14 +1,13 @@
 <resources>
     <string name="app_name">Friends Map</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="title_activity_main">ASD</string>
+    <string name="title_activity_main">Friends Map</string>
     <!-- Configuration string -->
-    <string name="http_base_url">http://192.168.43.70:8080/</string>
-    <!-- Strings related to login -->
+    <string name="http_base_url">https://friendsmaprest.herokuapp.com/</string>
+    <!-- Strings related to login / signup -->
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password (NOT IMPLEMENTED)</string>
-    <string name="action_sign_in">Log in</string>
-    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_sign_in">Use friends map</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
@@ -16,6 +15,18 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="action_go_to_signup">Go to sign up</string>
+    <string name="signup_username">Choose username</string>
+    <string name="signup_signupBtn">Signup</string>
+    <string name="signup_already_registered">Already registered? Go to login:</string>
+    <string name="signup_go_to_login">Go to login</string>
+
+    <string-array name="spinner_list_item_array">
+        <item>English</item>
+        <item>Hindi</item>
+        <item>Urdu</item>
+        <item>Arabic</item>
+    </string-array>
 
     <!-- MapBox related string -->
     <string name="mapbox_access_token">pk.eyJ1IjoiY2x4MyIsImEiOiJjanN3MTZtMjgwYnIxNDlvMDJ0ejBvdmt3In0.BZTTw5blqt9CqWHJJxgTgA</string>

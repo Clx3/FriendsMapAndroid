@@ -7,14 +7,20 @@ import fi.tuni.friendsmap.entity.User;
 
 public class JSONHandler {
 
-    public JSONObject getJsonObjectFromUser(User user) throws JSONException {
+    public JSONObject getJsonObjectFromUser(User user, boolean includeId) {
         JSONObject outputObject = new JSONObject();
 
-        outputObject.put("id", user.getUserId());
-        outputObject.put("username", user.getUsername());
-        outputObject.put("latitude", user.getLocation().getLatitude());
-        outputObject.put("longitude", user.getLocation().getLongitude());
-        outputObject.put("locationInfo", "Meh");
+        try {
+            if(includeId)
+                outputObject.put("id", user.getUserId());
+
+            outputObject.put("username", user.getUsername());
+            outputObject.put("latitude", user.getLocation().getLatitude());
+            outputObject.put("longitude", user.getLocation().getLongitude());
+            outputObject.put("locationInfo", "Meh");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         return outputObject;
     }

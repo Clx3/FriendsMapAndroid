@@ -12,11 +12,19 @@ import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.VolleyError;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -31,12 +39,16 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.Circle;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
 import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.plugins.annotation.Options;
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 import fi.tuni.friendsmap.entity.User;
 import fi.tuni.friendsmap.entity.UserLocation;
@@ -51,12 +63,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private LocationManager locationManager;
 
-    private CircleManager circleManager;
-    private Circle userCircle;
+    private SymbolManager symbolManager;
+    private Symbol localUserSymbol;
 
     private HttpHandler httpHandler;
+    private LocationsHandler locationsHandler;
 
-    private User user;
+    private User localUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +78,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
 
         httpHandler = new HttpHandler(this);
+        locationsHandler = new LocationsHandler(this, httpHandler);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        user = getUserAndSetLocation();
+        localUser = getUserAndSetLocation();
 
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
@@ -80,21 +94,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
-                        circleManager = new CircleManager(MainActivity.this.mapView, MainActivity.this.mapboxMap, style);
+                        symbolManager = new SymbolManager(MainActivity.this.mapView, MainActivity.this.mapboxMap, style);
+                        symbolManager.setTextAllowOverlap(true);
+                        symbolManager.setIconAllowOverlap(true);
+                        symbolManager.setIconPadding(2f);
+                        symbolManager.setTextLineHeight(2f);
+
+                        if(localUser.userHasLocation()) {
+                            localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
+                        }
+
+                        refreshAndMarkAllUsersAndLocations();
                     }
                 });
 
                 mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                     @Override
                     public boolean onMapClick(@NonNull LatLng point) {
-
+                        if(localUser.userHasLocation()) {
                             CameraPosition position = new CameraPosition.Builder()
-                                    .target(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude())) // Sets the new camera position
+                                    .target(new LatLng(localUser.getLocation().getLatitude(), localUser.getLocation().getLongitude())) // Sets the new camera position
                                     .zoom(17) // Sets the zoom
                                     .build(); // Creates a CameraPosition from the builder
 
                             MainActivity.this.mapboxMap.animateCamera(CameraUpdateFactory
                                     .newCameraPosition(position), 7000);
+                        }
 
                         return true;
                     }
@@ -111,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 try {
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
 
-                    user = getUserAndSetLocation();
+                    localUser = getUserAndSetLocation();
                 } catch(SecurityException e) {
 
                 }
@@ -145,29 +170,106 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return outputUser;
     }
 
-    public void markLocationBtnClicked(View v) throws JSONException {
-        int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
+    private void refreshAndMarkAllUsersAndLocations() {
+        locationsHandler.updateAllUsersAndLocations(new HttpHandler.VolleyCallBack() {
+            @Override
+            public void onSuccess() {
+                markAllUserLocationsToMap();
+            }
+            @Override
+            public void onError() {
 
-        if(permissionCheck == PackageManager.PERMISSION_DENIED) {
-            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            }
+        });
+    }
 
-            ActivityCompat.requestPermissions(MainActivity.this, permissions, ACCESS_LOCATION_REQUEST_CODE);
-        } else {
-            Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude(), "");
+    private void markAllUserLocationsToMap() {
+        for(User user : locationsHandler.getUsersAndLocationsList()) {
+            if (user.getUserId() != localUser.getUserId() && (user.getLocation().getLatitude() != -1 || user.getLocation().getLongitude() != -1)) {
+                SymbolOptions options = new SymbolOptions()
+                        .withLatLng(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
+                        .withIconImage("information-11")
+                        .withIconSize(2f)
+                        .withTextField("\n" + user.getUsername())
+                        .withTextColor(ColorUtils.colorToRgbaString(Color.RED))
+                        .withTextMaxWidth(7f);
 
-            user.setLocation(userLocation);
+
+                symbolManager.create(options);
+            }
         }
-        if(userCircle != null)
-            circleManager.delete(userCircle);
+    }
 
-        CircleOptions option = new CircleOptions()
-                .withLatLng(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
-                .withCircleRadius(10f);
-        userCircle = circleManager.create(option);
+    public void actionsMenuClicked(View v) {
+        System.out.println("ASDAS");
+    }
 
-        httpHandler.updateUserAndItsLocation(user);
-        System.out.println("HAHA");
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.friendsmap_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch(menuItem.getItemId()) {
+            case R.id.markLocation:
+                /* Deleting the previous mark */
+                int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
+
+                if(permissionCheck == PackageManager.PERMISSION_DENIED) {
+                    String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+                    ActivityCompat.requestPermissions(MainActivity.this, permissions, ACCESS_LOCATION_REQUEST_CODE);
+                } else {
+                    Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    UserLocation userLocation = new UserLocation(location.getLatitude(), location.getLongitude(), "");
+
+                    localUser.setLocation(userLocation);
+                }
+
+                try {
+                    httpHandler.updateUserAndItsLocation(localUser);
+
+                    if(localUserSymbol != null)
+                        symbolManager.delete(localUserSymbol);
+
+                    localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
+
+                    Toast.makeText(this, "Location marked succesfully.", Toast.LENGTH_SHORT).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Location marking failed.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case R.id.deleteLocation:
+                locationsHandler.deleteUsersLocation(localUser);
+
+                if(localUserSymbol != null)
+                    symbolManager.delete(localUserSymbol);
+                break;
+
+            case R.id.refreshLocations:
+                refreshAndMarkAllUsersAndLocations();
+                break;
+        }
+        return true;
+    }
+
+    private SymbolOptions getLocalUserSymbolOptions() {
+        return new SymbolOptions()
+                .withLatLng(new LatLng(localUser.getLocation().getLatitude(), localUser.getLocation().getLongitude()))
+                .withIconImage("information-11")
+                .withIconSize(2f)
+                .withTextField(String.format("%nYOU (%s)", localUser.getUsername()))
+                .withTextColor(ColorUtils.colorToRgbaString(Color.GREEN))
+                .withTextMaxWidth(7f);
     }
 
     // Add the mapView's own lifecycle methods to the activity's lifecycle methods
@@ -204,6 +306,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (symbolManager != null) {
+            symbolManager.onDestroy();
+        }
+
         mapView.onDestroy();
     }
 
