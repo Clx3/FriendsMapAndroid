@@ -3,7 +3,7 @@
     <string name="title_activity_login">Sign in</string>
     <string name="title_activity_main">Friends Map</string>
     <!-- Configuration string -->
-    <string name="http_base_url">http://friendsmaprest.herokuapp.com/</string>
+    <string name="http_base_url">https://friendsmaprest.herokuapp.com/</string>
     <!-- Strings related to login / signup -->
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password (NOT IMPLEMENTED)</string>
