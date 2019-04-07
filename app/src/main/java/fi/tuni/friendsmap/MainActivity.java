@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void markAllUserLocationsToMap() {
         for(User user : locationsHandler.getUsersAndLocationsList()) {
-            if (user.getUserId() != localUser.getUserId() && (user.getLocation().getLatitude() != -1 || user.getLocation().getLongitude() != -1)) {
+            if (user.getUserId() != localUser.getUserId() && (user.userHasLocation())) {
                 SymbolOptions options = new SymbolOptions()
                         .withLatLng(new LatLng(user.getLocation().getLatitude(), user.getLocation().getLongitude()))
                         .withIconImage("information-11")

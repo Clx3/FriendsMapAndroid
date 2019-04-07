@@ -43,7 +43,7 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if(!cancel) {
-            User signupUser = new User(-1, username, new UserLocation(-1, -1, ""));
+            User signupUser = new User(-1, username, new UserLocation(-1000, -1000, ""));
 
             httpHandler.signUp(signupUser, new HttpHandler.VolleyCallBackWithParams<JSONObject>() {
                 @Override
