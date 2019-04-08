@@ -48,6 +48,7 @@ import com.mapbox.mapboxsdk.utils.ColorUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fi.tuni.friendsmap.entity.User;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private SymbolManager symbolManager;
     private Symbol localUserSymbol;
+    private List<Symbol> allSymbols;
 
     private HttpHandler httpHandler;
     private LocationsHandler locationsHandler;
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         httpHandler = new HttpHandler(this);
         locationsHandler = new LocationsHandler(this, httpHandler);
+
+        allSymbols = new ArrayList<>();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         localUser = getUserAndSetLocation();
@@ -174,6 +178,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         locationsHandler.updateAllUsersAndLocations(new HttpHandler.VolleyCallBack() {
             @Override
             public void onSuccess() {
+                symbolManager.delete(allSymbols);
+                allSymbols.clear();
+
+               if(localUser != null && localUser.userHasLocation()) {
+                   System.out.println(localUser.getLocation().getLatitude());
+                   System.out.println(localUser.getLocation().getLongitude());
+                   //localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
+                    //allSymbols.add(localUserSymbol);
+                }
                 markAllUserLocationsToMap();
             }
             @Override
@@ -193,9 +206,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                         .withTextField("\n" + user.getUsername())
                         .withTextColor(ColorUtils.colorToRgbaString(Color.RED))
                         .withTextMaxWidth(7f);
-
-
-                symbolManager.create(options);
+                Symbol symbol = symbolManager.create(options);
+                allSymbols.add(symbol);
             }
         }
     }
@@ -233,26 +245,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     localUser.setLocation(userLocation);
                 }
 
-                try {
-                    httpHandler.updateUserAndItsLocation(localUser);
-
-                    if(localUserSymbol != null)
-                        symbolManager.delete(localUserSymbol);
-
-                    localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
-
-                    Toast.makeText(this, "Location marked succesfully.", Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Location marking failed.", Toast.LENGTH_SHORT).show();
-                }
+                updateLocalUsersLocationAndSymbol();
                 break;
 
             case R.id.deleteLocation:
                 locationsHandler.deleteUsersLocation(localUser);
 
-                if(localUserSymbol != null)
+                if(localUserSymbol != null) {
                     symbolManager.delete(localUserSymbol);
+                    allSymbols.remove(localUserSymbol);
+                }
+
                 break;
 
             case R.id.refreshLocations:
@@ -260,6 +263,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 break;
         }
         return true;
+    }
+
+    private void updateLocalUsersLocationAndSymbol() {
+        try {
+            httpHandler.updateUserAndItsLocation(localUser);
+
+            if(localUserSymbol != null) {
+                symbolManager.delete(localUserSymbol);
+                allSymbols.remove(localUserSymbol);
+            }
+
+            localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
+
+            allSymbols.add(localUserSymbol);
+
+            Toast.makeText(this, "Location marked succesfully.", Toast.LENGTH_SHORT).show();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Location marking failed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private SymbolOptions getLocalUserSymbolOptions() {
