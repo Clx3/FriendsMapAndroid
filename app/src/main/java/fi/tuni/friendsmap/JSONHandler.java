@@ -5,8 +5,18 @@ import org.json.JSONObject;
 
 import fi.tuni.friendsmap.entity.User;
 
+/**
+ * Class thats functions are used when we are working with JSON.
+ */
 public class JSONHandler {
 
+    /**
+     * Gets an user entity as a JSON object that can be used for http requests.
+     *
+     * @param user User to be returned as JSONOBJECT.
+     * @param includeId true if we want the JSONBJECT to contain the id of the user.
+     * @return REturns the created JSONObject.
+     */
     public JSONObject getJsonObjectFromUser(User user, boolean includeId) {
         JSONObject outputObject = new JSONObject();
 

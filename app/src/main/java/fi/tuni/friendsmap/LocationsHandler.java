@@ -13,12 +13,20 @@ import java.util.List;
 import fi.tuni.friendsmap.entity.User;
 import fi.tuni.friendsmap.entity.UserLocation;
 
+/**
+ * Class that handles local users and other marked users
+ * location in the application.
+ */
 public class LocationsHandler {
 
     private Context context;
 
     private HttpHandler httpHandler;
 
+    /**
+     * Contains the list of all users  and their locations that
+     * are received from the backend.
+     */
     private List<User> usersAndLocationsList;
 
 
@@ -28,15 +36,21 @@ public class LocationsHandler {
         usersAndLocationsList = new ArrayList<>();
     }
 
-    public JSONObject getUserAndLocationAsJson(User user) {
-        JSONObject outputObj = new JSONObject();
-        return null;
-    }
-
+    /**
+     * Updates the usersAndLocationsList by making a http request
+     * using HttpHandler.
+     *
+     * @param callBack
+     */
     public void updateAllUsersAndLocations(HttpHandler.VolleyCallBack callBack) {
         httpHandler.updateAllUsersAndLocations(usersAndLocationsList, callBack);
     }
 
+    /**
+     * Deletes an users location.
+     *
+     * @param user User thats location to be deleted.
+     */
     public void deleteUsersLocation(User user) {
         httpHandler.deleteUsersLocation(user, new HttpHandler.VolleyCallBackWithParams<JSONObject>() {
             @Override

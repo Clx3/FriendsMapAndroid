@@ -15,11 +15,18 @@ import org.json.JSONObject;
 import fi.tuni.friendsmap.entity.User;
 import fi.tuni.friendsmap.entity.UserLocation;
 
+/**
+ * Signup activity for FriendsMap, where user is able to
+ * create an account.
+ */
 public class SignupActivity extends AppCompatActivity {
 
     /* UI references */
     private AutoCompleteTextView usernameField;
 
+    /**
+     * HttpHandler used by this activity.
+     */
     private HttpHandler httpHandler;
 
     @Override
@@ -32,6 +39,13 @@ public class SignupActivity extends AppCompatActivity {
         usernameField = (AutoCompleteTextView) findViewById(R.id.username);
     }
 
+    /**
+     * Creates an account by making a http request if
+     * everything is valid.
+     *
+     * @param
+     * @throws JSONException
+     */
     public void signupBtnClicked(View v) throws JSONException {
         String username = usernameField.getText().toString();
 
@@ -62,6 +76,10 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Switches activty to login.
+     * @param v
+     */
     public void goToLoginBtnClicked(View v) {
         startActivity(new Intent(this, LoginActivity.class));
     }
