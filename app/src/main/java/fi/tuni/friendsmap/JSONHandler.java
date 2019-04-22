@@ -25,4 +25,22 @@ public class JSONHandler {
         return outputObject;
     }
 
+    /**
+     * Returns a JSONObject that can be used for
+     * login to this application backend.
+     *
+     * @param loginDetails Login details as string, aka username.
+     * @return The created JSONObject, if something wrong returns null.
+     */
+    public JSONObject getLoginDetailsSignupJSON(String loginDetails) {
+        JSONObject outputObj = new JSONObject();
+        try {
+            outputObj.put("username", loginDetails);
+            return outputObj;
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

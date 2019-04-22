@@ -6,15 +6,10 @@
     <string name="http_base_url">https://friendsmaprest.herokuapp.com/</string>
     <!-- Strings related to login / signup -->
     <string name="prompt_username">Username</string>
-    <string name="prompt_password">Password (NOT IMPLEMENTED)</string>
     <string name="action_sign_in">Use friends map</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_too_short_username">Invalid username. Must be over 3 characters.</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+
     <string name="action_go_to_signup">Go to sign up</string>
     <string name="signup_username">Choose username</string>
     <string name="signup_signupBtn">Signup</string>

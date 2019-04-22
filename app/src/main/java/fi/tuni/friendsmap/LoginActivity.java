@@ -25,7 +25,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONObject;
 
 /**
- * A login screen that offers login via username/password.
+ * Login activity for FriendsMap application.
  */
 public class LoginActivity extends AppCompatActivity  {
 
@@ -39,10 +39,18 @@ public class LoginActivity extends AppCompatActivity  {
      */
     protected RequestQueue requestQueue;
 
+    /**
+     * JSONHandler instance used by this activity.
+     */
+    private JSONHandler jsonHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        jsonHandler = new JSONHandler();
+
         // Set up the login form.
         mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
 
@@ -60,17 +68,6 @@ public class LoginActivity extends AppCompatActivity  {
         requestQueue = Volley.newRequestQueue(this);
     }
 
-    private JSONObject getUserDetailsAsJsonObject() {
-        JSONObject outputObj = new JSONObject();
-        try {
-            outputObj.put("username", mUsernameView.getText().toString());
-            return outputObj;
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     /**
      * Called when the go to signup button is clicked to
      * go to the signup page.
@@ -82,9 +79,10 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
+     * Attempts login to the Friends map application.
+     * First it checks that the form is filled correctly, and
+     * if so it makes a http request for the backend and if it is
+     * successfull, we go to the main activity of friendsmap.
      */
     private void attemptLogin() {
 
@@ -92,18 +90,17 @@ public class LoginActivity extends AppCompatActivity  {
         mUsernameView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mUsernameView.getText().toString();
+        String username = mUsernameView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(username)) {
             mUsernameView.setError(getString(R.string.error_field_required));
             focusView = mUsernameView;
             cancel = true;
-        } else if (!isUsernameValid(email)) {
-            mUsernameView.setError(getString(R.string.error_invalid_email));
+        } else if (!isUsernameValid(username)) {
+            mUsernameView.setError(getString(R.string.error_too_short_username));
             focusView = mUsernameView;
             cancel = true;
         }
@@ -119,7 +116,7 @@ public class LoginActivity extends AppCompatActivity  {
             String baseUrl = getResources().getString(R.string.http_base_url);
 
             JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST,
-                    baseUrl + "users/login/", getUserDetailsAsJsonObject(),
+                    baseUrl + "users/login/", jsonHandler.getLoginDetailsSignupJSON(mUsernameView.getText().toString()),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -153,8 +150,7 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     private boolean isUsernameValid(String username) {
-        //TODO: Replace this with your own logic
-        return true;
+        return username.length() > 3;
     }
 
     /**
