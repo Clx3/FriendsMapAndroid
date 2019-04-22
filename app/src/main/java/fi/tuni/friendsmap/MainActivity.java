@@ -193,6 +193,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public User getUserAndSetLocation() {
         User outputUser = new User(-1,"", null);
 
@@ -248,15 +252,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                         .withIconSize(2f)
                         .withTextField("\n" + user.getUsername())
                         .withTextColor(ColorUtils.colorToRgbaString(Color.RED))
+                        .withTextHaloWidth(0.35f)
+                        .withTextHaloColor(ColorUtils.colorToRgbaString(Color.BLACK))
                         .withTextMaxWidth(5f);
                 Symbol symbol = symbolManager.create(options);
                 allSymbols.add(symbol);
             }
         }
-    }
-
-    public void actionsMenuClicked(View v) {
-        System.out.println("ASDAS");
     }
 
     @Override
@@ -314,6 +316,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return true;
     }
 
+    /**
+     * Updates the local users location and refreshes its symbol on the map.
+     */
     private void updateLocalUsersLocationAndSymbol() {
         try {
             httpHandler.updateUserAndItsLocation(localUser);
@@ -341,6 +346,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .withIconSize(2f)
                 .withTextField("\n You - " + localUser.getUsername())
                 .withTextColor(ColorUtils.colorToRgbaString(Color.GREEN))
+                .withTextHaloWidth(0.35f)
+                .withTextHaloColor(ColorUtils.colorToRgbaString(Color.BLACK))
                 .withTextMaxWidth(8f);
     }
 
