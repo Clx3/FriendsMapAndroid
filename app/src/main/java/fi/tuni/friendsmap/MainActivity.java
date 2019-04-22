@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,23 +11,14 @@ import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.PopupMenu;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.android.volley.VolleyError;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -36,17 +26,12 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.plugins.annotation.Circle;
-import com.mapbox.mapboxsdk.plugins.annotation.CircleManager;
-import com.mapbox.mapboxsdk.plugins.annotation.CircleOptions;
-import com.mapbox.mapboxsdk.plugins.annotation.Options;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.utils.ColorUtils;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,23 +41,74 @@ import fi.tuni.friendsmap.entity.UserLocation;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
+    /**
+     * Request code for android callback.
+     */
     public static final int ACCESS_LOCATION_REQUEST_CODE = 0;
 
+    /**
+     * Mapview instance of Friendsmap.
+     */
     private MapView mapView;
+
+    /**
+     * MapboxMap instance of Friedsmap.
+     */
     private MapboxMap mapboxMap;
+
+    /**
+     * Style of the mapbox.
+     */
     private Style mapStyle;
 
+    /**
+     * Instance of a LocationManager used by this application.
+     */
     private LocationManager locationManager;
 
+    /**
+     * Mapbox plugins SymbolManager instance which handles
+     * the symbols that are drawn on the map.
+     */
     private SymbolManager symbolManager;
+
+    /**
+     * Contains the Symbol of the local user.
+     */
     private Symbol localUserSymbol;
+
+    /**
+     * Contains all Symbols of users marked to the application.
+     * This List is updated when we make a call for the backend for users.
+     */
     private List<Symbol> allSymbols;
 
+    /**
+     * Instance of a HttpHandler used by this application.
+     */
     private HttpHandler httpHandler;
+
+    /**
+     * Instance of LocationsHandler user by this application.
+     */
     private LocationsHandler locationsHandler;
 
+    /**
+     * Instance of a User which represents
+     * the local user.
+     */
     private User localUser;
 
+    /**
+     * MainActivitys onCreate.
+     *
+     * This method initializes the MapBox and its styles. Also
+     * it initializes the locationHandler and httpHandler, and makes the
+     * needed http calls to initialize the local users and all marked users
+     * locations.
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,6 +169,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
+    /**
+     * Android callback when it is requesting permissions. in this case Location permission.
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if(requestCode == ACCESS_LOCATION_REQUEST_CODE) {
@@ -184,8 +227,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                if(localUser != null && localUser.userHasLocation()) {
                    System.out.println(localUser.getLocation().getLatitude());
                    System.out.println(localUser.getLocation().getLongitude());
-                   //localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
-                    //allSymbols.add(localUserSymbol);
+                   localUserSymbol = symbolManager.create(getLocalUserSymbolOptions());
+                   allSymbols.add(localUserSymbol);
                 }
                 markAllUserLocationsToMap();
             }
@@ -205,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                         .withIconSize(2f)
                         .withTextField("\n" + user.getUsername())
                         .withTextColor(ColorUtils.colorToRgbaString(Color.RED))
-                        .withTextMaxWidth(7f);
+                        .withTextMaxWidth(5f);
                 Symbol symbol = symbolManager.create(options);
                 allSymbols.add(symbol);
             }
@@ -227,6 +270,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return true;
     }
 
+    /**
+     * Handles toolbar menu button clicks(selections).
+     *
+     * @param menuItem Which menu item is selected/clicked.
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch(menuItem.getItemId()) {
@@ -290,9 +339,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .withLatLng(new LatLng(localUser.getLocation().getLatitude(), localUser.getLocation().getLongitude()))
                 .withIconImage("information-11")
                 .withIconSize(2f)
-                .withTextField(String.format("%nYOU (%s)", localUser.getUsername()))
+                .withTextField("\n You - " + localUser.getUsername())
                 .withTextColor(ColorUtils.colorToRgbaString(Color.GREEN))
-                .withTextMaxWidth(7f);
+                .withTextMaxWidth(8f);
     }
 
     // Add the mapView's own lifecycle methods to the activity's lifecycle methods

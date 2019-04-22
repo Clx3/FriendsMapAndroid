@@ -21,13 +21,6 @@
     <string name="signup_already_registered">Already registered? Go to login:</string>
     <string name="signup_go_to_login">Go to login</string>
 
-    <string-array name="spinner_list_item_array">
-        <item>English</item>
-        <item>Hindi</item>
-        <item>Urdu</item>
-        <item>Arabic</item>
-    </string-array>
-
     <!-- MapBox related string -->
     <string name="mapbox_access_token">pk.eyJ1IjoiY2x4MyIsImEiOiJjanN3MTZtMjgwYnIxNDlvMDJ0ejBvdmt3In0.BZTTw5blqt9CqWHJJxgTgA</string>
 </resources>

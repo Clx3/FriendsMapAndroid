@@ -37,8 +37,6 @@ public class LocationsHandler {
         httpHandler.updateAllUsersAndLocations(usersAndLocationsList, callBack);
     }
 
-    public void setMainUsersLocation() {}
-
     public void deleteUsersLocation(User user) {
         httpHandler.deleteUsersLocation(user, new HttpHandler.VolleyCallBackWithParams<JSONObject>() {
             @Override
