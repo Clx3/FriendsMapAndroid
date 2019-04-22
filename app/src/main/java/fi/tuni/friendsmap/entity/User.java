@@ -19,6 +19,12 @@ public class User {
         this.location = location;
     }
 
+    /**
+     * In friendsmap if user does not have a location, its latitude and longitude in the backend
+     * are set as -1000, so if either of those are true, user has not location.
+     *
+     * @return Returns if the user has location or not.
+     */
     public boolean userHasLocation() {
         return getLocation().getLatitude() != -1000 || getLocation().getLongitude() != -1000;
     }

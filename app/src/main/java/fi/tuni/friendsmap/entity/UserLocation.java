@@ -1,5 +1,8 @@
 package fi.tuni.friendsmap.entity;
 
+/**
+ * POJO class representing a location of a single user.
+ */
 public class UserLocation {
 
     private double latitude;
