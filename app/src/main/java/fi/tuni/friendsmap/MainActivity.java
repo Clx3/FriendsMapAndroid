@@ -194,8 +194,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     /**
+     * Creates a new with the location from the android devies
+     * system. Also performs the permission check for location.
      *
-     * @return
+     * @return Returns the created User.
      */
     public User getUserAndSetLocation() {
         User outputUser = new User(-1,"", null);
@@ -221,6 +223,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return outputUser;
     }
 
+    /**
+     * Refreshes all users locations from the backend and then
+     * re draws the symbols of them to the map.
+     */
     private void refreshAndMarkAllUsersAndLocations() {
         locationsHandler.updateAllUsersAndLocations(new HttpHandler.VolleyCallBack() {
             @Override
@@ -243,6 +249,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
     }
 
+    /**
+     * Creates symbols for all users from locationHandlers users list
+     * to the map.
+     */
     private void markAllUserLocationsToMap() {
         for(User user : locationsHandler.getUsersAndLocationsList()) {
             if (user.getUserId() != localUser.getUserId() && (user.userHasLocation())) {
